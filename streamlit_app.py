@@ -15,9 +15,7 @@ allowSelfSignedHttps(True) # this line is needed if you use self-signed certific
 # Show title and description.
 st.title("💬 Chatbot")
 st.write(
-    "This is a simple chatbot that uses OpenAI's GPT-3.5 model to generate responses. "
-    "To use this app, you need to provide an OpenAI API key, which you can get [here](https://platform.openai.com/account/api-keys). "
-    "You can also learn how to build this app step by step by [following our tutorial](https://docs.streamlit.io/develop/tutorials/llms/build-conversational-apps)."
+    "Please ask any LX service related question."
 )
 
 # Ask user for their OpenAI API key via `st.text_input`.
@@ -38,15 +36,18 @@ else:
 
     # Display the existing chat messages via `st.chat_message`.
     for message in st.session_state.messages:
-        with st.chat_message(message["role"]):
-            st.markdown(message["content"])
+        if message["input"]["question"]:
+            with st.chat_message("user"):
+                st.markdown(message["input"]["question"])
+        if message["outputs"]["answer"]:
+            with st.chat_message("assistant"):
+                st.markdown(message["outputs"]["answer"])
 
     # Create a chat input field to allow the user to enter a message. This will display
     # automatically at the bottom of the page.
     if prompt := st.chat_input("How can I help?"):
 
-        # Store and display the current prompt.
-        st.session_state.messages.append({"role": "user", "content": prompt})
+        # Display the current prompt.
         with st.chat_message("user"):
             st.markdown(prompt)
         
@@ -76,7 +77,7 @@ else:
                     st.markdown(response_data['answer'])
                 
                 st.session_state.messages.append(
-                    {"inputs": {"question": prompt},
+                    {"input": {"question": prompt},
                      "outputs": {"answer": response_data['answer']}}
                 )
             else:
